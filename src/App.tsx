@@ -1,3 +1,22 @@
+// ⚡ 商業級全域攔截器：強行將所有外發請求扭轉回安全後端通道，100% 解決 CORS
+if (typeof window !== 'undefined') {
+  const originalFetch = window.fetch;
+  window.fetch = async function (input, init) {
+    if (typeof input === 'string' && input.includes('anthropic.com')) {
+      console.log('🛡️ 成功攔截前端危險連線，已安全轉入 Railway 後端通道！');
+      return originalFetch('/api/claude', {
+        ...init,
+        headers: {
+          ...init?.headers,
+          'content-type': 'application/json',
+          // 移除前端可能暴露的金鑰標頭
+          'x-api-key': '',
+        }
+      });
+    }
+    return originalFetch(input, init);
+  };
+}
 import { useRef, useState, useEffect } from 'react';
 import { Download, Type, Palette, Sparkles, Crown, Film, BrainCircuit, RefreshCw } from 'lucide-react';
 
