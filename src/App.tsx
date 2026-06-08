@@ -12,6 +12,7 @@ export default function App() {
     if (!text.trim()) return;
     setLoading(true);
     try {
+      // 🎯 這裡改成絕對路徑的 '/api/claude'，強制精準呼叫同一個 Zeabur 容器的後端！
       const response = await fetch('/api/claude', {
         method: 'POST',
         headers: {
@@ -26,7 +27,7 @@ export default function App() {
       if (response.ok && data.result) {
         setResult(data.result.replace(/^["']|["']$/g, ''));
       } else if (data.error) {
-        alert(`AI 思考失敗：${data.error}`);
+        alert(`AI 思考失敗：${typeof data.error === 'object' ? JSON.stringify(data.error) : data.error}`);
       } else {
         alert('連線到 AI 大腦失敗，請確認網路或後端設定！');
       }
