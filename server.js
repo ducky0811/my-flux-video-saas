@@ -1,11 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import fetch from 'node-fetch';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -13,9 +8,10 @@ const PORT = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json());
 
-// 讓後端直接把打包好的漂亮前端畫面（dist 資料夾）當成首頁送出來
-app.use(express.static(path.join(__dirname, 'dist')));
+// 🎯 用最安全直接的方式靜態託管 dist 資料夾
+app.use(express.static('dist'));
 
+// 服務檢查端點
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
@@ -29,7 +25,7 @@ app.post('/api/claude', async (req, res) => {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) return res.status(500).json({ error: '後端未配置 ANTHROPIC_API_KEY 環境變數！' });
 
-    // Anthropic 官方最新標準規格
+    // Anthropic 官方標準規格
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -53,9 +49,9 @@ app.post('/api/claude', async (req, res) => {
   }
 });
 
-// 當使用者瀏覽首頁或任何路徑時，一律給他最奢華的 React 畫面
+// 任何路由一律指向 dist 裡面的 index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  res.sendFile('dist/index.html', { root: '.' });
 });
 
 app.listen(PORT, () => {
